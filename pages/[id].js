@@ -3,19 +3,20 @@ import Head from "next/head";
 import { getDatabase, getPage, getBlocks } from "../lib/notion";
 import Link from "next/link";
 import { databaseId } from "./index.js";
-import styles from "./post.module.css";
+import styles from "../styles/post.module.css";
 
 export const Text = ({ text }) => {
   if (!text) {
     return null;
   }
-  return text.map((value) => {
+  return text.map((value, key) => {
     const {
       annotations: { bold, code, color, italic, strikethrough, underline },
       text,
     } = value;
     return (
       <span
+        key={key}
         className={[
           bold ? styles.bold : "",
           code ? styles.code : "",
@@ -36,21 +37,13 @@ const renderNestedList = (block) => {
   const value = block[type];
   if (!value) return null;
 
-  const isNumberedList = value.children[0].type === 'numbered_list_item'
+  const isNumberedList = value.children[0].type === "numbered_list_item";
 
   if (isNumberedList) {
-    return (
-      <ol>
-        {value.children.map((block) => renderBlock(block))}
-      </ol>
-    )
+    return <ol>{value.children.map((block) => renderBlock(block))}</ol>;
   }
-  return (
-    <ul>
-      {value.children.map((block) => renderBlock(block))}
-    </ul>
-  )
-}
+  return <ul>{value.children.map((block) => renderBlock(block))}</ul>;
+};
 
 const renderBlock = (block) => {
   const { type, id } = block;
@@ -151,10 +144,10 @@ const renderBlock = (block) => {
         </figure>
       );
     case "bookmark":
-      const href = value.url
+      const href = value.url;
       return (
-        <a href={ href } target="_brank" className={styles.bookmark}>
-          { href }
+        <a href={href} target="_brank" className={styles.bookmark}>
+          {href}
         </a>
       );
     default:
@@ -175,17 +168,53 @@ export default function Post({ page, blocks }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          backgroundColor: "#18181f",
+        }}
+      >
+        <div
+          style={{ display: "flex", alignItems: "center" }}
+          className={styles.container}
+        >
+          <Link href="/">
+            <a
+              style={{
+                marginBottom: 0,
+                lineHeight: 0,
+                color: "#fff",
+                marginRight: "10px",
+              }}
+              className={styles.back}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="css-i6dzq1"
+              >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </a>
+          </Link>
+          <h1 className={styles.name}>
+            <Text text={page.properties.Name.title} />
+          </h1>
+        </div>
+      </div>
       <article className={styles.container}>
-        <h1 className={styles.name}>
-          <Text text={page.properties.Name.title} />
-        </h1>
         <section>
           {blocks.map((block) => (
             <Fragment key={block.id}>{renderBlock(block)}</Fragment>
           ))}
-          <Link href="/">
-            <a className={styles.back}>← Go home</a>
-          </Link>
         </section>
       </article>
     </div>
@@ -205,8 +234,6 @@ export const getStaticProps = async (context) => {
   const page = await getPage(id);
   const blocks = await getBlocks(id);
 
-  // Retrieve block children for nested blocks (one level deep), for example toggle blocks
-  // https://developers.notion.com/docs/working-with-page-content#reading-nested-blocks
   const childBlocks = await Promise.all(
     blocks
       .filter((block) => block.has_children)
@@ -218,7 +245,6 @@ export const getStaticProps = async (context) => {
       })
   );
   const blocksWithChildren = blocks.map((block) => {
-    // Add child blocks if the block should contain children but none exists
     if (block.has_children && !block[block.type].children) {
       block[block.type]["children"] = childBlocks.find(
         (x) => x.id === block.id
