@@ -12,11 +12,6 @@ export default function Home({ posts }) {
     <div>
       <Head>
         <title>Svenit</title>
-        <link rel="icon" href="/favicon.ico" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Muli:400,400i,700,700i,800"
-        />
       </Head>
 
       <main className={styles.container}>

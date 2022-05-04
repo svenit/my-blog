@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import Head from "next/head";
 import { getDatabase, getPage, getBlocks } from "../lib/notion";
 import Link from "next/link";
@@ -121,7 +121,7 @@ const renderBlock = (block) => {
     case "code":
       return (
         <pre className={styles.pre}>
-          <code className={styles.code_block} key={id}>
+          <code className="language-js line-numbers" key={id}>
             {value.text[0].plain_text}
           </code>
         </pre>
@@ -158,6 +158,10 @@ const renderBlock = (block) => {
 };
 
 export default function Post({ page, blocks }) {
+  useEffect(() => {
+    window.Prism.highlightAll();
+  }, []);
+
   if (!page || !blocks) {
     return <div />;
   }
@@ -165,51 +169,28 @@ export default function Post({ page, blocks }) {
     <div>
       <Head>
         <title>{page.properties.Name.title[0].plain_text}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <div
         style={{
           position: "sticky",
           top: 0,
           backgroundColor: "#18181f",
+          zIndex: 9999,
         }}
       >
         <div
           style={{ display: "flex", alignItems: "center" }}
           className={styles.container}
         >
-          <Link href="/">
-            <a
-              style={{
-                marginBottom: 0,
-                lineHeight: 0,
-                color: "#fff",
-                marginRight: "10px",
-              }}
-              className={styles.back}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                stroke="currentColor"
-                stroke-width="2"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="css-i6dzq1"
-              >
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-            </a>
-          </Link>
           <h1 className={styles.name}>
             <Text text={page.properties.Name.title} />
           </h1>
         </div>
       </div>
+      {/* <label>
+        <input type="checkbox" />
+        <div class="like-btn-svg"></div>
+      </label> */}
       <article className={styles.container}>
         <section>
           {blocks.map((block) => (

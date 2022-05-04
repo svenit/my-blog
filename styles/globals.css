@@ -34,3 +34,33 @@ a {
 h1 {
   font-weight: 800;
 }
+
+.like-btn-svg {
+  width: 80px;
+  height: 100px;
+  background: url(/web_heart_animation.png) no-repeat;
+  background-position: 0 0;
+  cursor: pointer;
+  position: fixed;
+  left: 300px;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input:checked+.like-btn-svg {
+  transition: background 1s steps(28);
+  animation: fave-like-btn-svg 1s steps(28);
+  background-position: -2800px 0;
+}
+
+@keyframes fave-like-btn-svg {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: -2800px 0;
+  }
+}
